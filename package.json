@@ -1,0 +1,15 @@
+"name": "chat_bot_nodejs",
+  "version": "0.0.1",
+  "description": "A chat example to showcase how to use `socket.io` with a static `express` server with `async` for control flow.",
+  "main": "server.js",
+  "repository": "",
+  "author": "luc.nnu",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "*",
+    "express": "*",
+    "morgan": "*",
+    "request": "*"
+  }
