@@ -1,4 +1,5 @@
-"name": "chat_bot_nodejs",
+{
+  "name": "chat_bot_nodejs",
   "version": "0.0.1",
   "description": "A chat example to showcase how to use `socket.io` with a static `express` server with `async` for control flow.",
   "main": "server.js",
@@ -13,3 +14,4 @@
     "morgan": "*",
     "request": "*"
   }
+}
