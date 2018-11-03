@@ -1,36 +1,63 @@
-// # SimpleServer
-// A simple chat bot server
+'use strict';
 
-var logger = require('morgan');
-var http = require('http');
-var bodyParser = require('body-parser');
-var express = require('express');
-var request = require('request');
-var router = express();
+// Imports dependencies and set up http server
+const
+  express = require('express'),
+  bodyParser = require('body-parser'),
+  app = express().use(bodyParser.json()); // creates express http server
 
-var app = express();
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
-var server = http.createServer(app);
+// Sets server port and logs message on success
+app.listen(process.env.PORT || 3000, () => console.log('webhook is listening'));
 
+// Creates the endpoint for our webhook 
+app.post('/webhook', (req, res) => {  
+ 
+  let body = req.body;
 
-app.get('/', (req, res) => {
-  res.send("Home page. Server running okay.");
-});
+  // Checks this is an event from a page subscription
+  if (body.object === 'page') {
 
-app.get('/webhook', function(req, res) {
-  if (req.query['hub.verify_token'] === 'anh_hoang_dep_trai_vo_doi') {
-    res.send(req.query['hub.challenge']);
+    // Iterates over each entry - there may be multiple if batched
+    body.entry.forEach(function(entry) {
+
+      // Gets the message. entry.messaging is an array, but 
+      // will only ever contain one message, so we get index 0
+      let webhook_event = entry.messaging[0];
+      console.log(webhook_event);
+    });
+
+    // Returns a '200 OK' response to all requests
+    res.status(200).send('EVENT_RECEIVED');
+  } else {
+    // Returns a '404 Not Found' if event is not from a page subscription
+    res.sendStatus(404);
   }
-  res.send('Error, wrong validation token');
+
 });
+// Adds support for GET requests to our webhook
+app.get('/webhook', (req, res) => {
 
-app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3002);
-app.set('ip', process.env.OPENSHIFT_NODEJS_IP || process.env.IP || "127.0.0.1");
-
-server.listen(app.get('port'), app.get('ip'), function() {
-  console.log("Chat bot server listening at %s:%d ", app.get('ip'), app.get('port'));
+  // Your verify token. Should be a random string.
+  let VERIFY_TOKEN = "12345678"
+    
+  // Parse the query params
+  let mode = req.query['hub.mode'];
+  let token = req.query['hub.verify_token'];
+  let challenge = req.query['hub.challenge'];
+    
+  // Checks if a token and mode is in the query string of the request
+  if (mode && token) {
+  
+    // Checks the mode and token sent is correct
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      
+      // Responds with the challenge token from the request
+      console.log('WEBHOOK_VERIFIED');
+      res.status(200).send(challenge);
+    
+    } else {
+      // Responds with '403 Forbidden' if verify tokens do not match
+      res.sendStatus(403);      
+    }
+  }
 });
